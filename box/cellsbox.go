@@ -1,43 +1,31 @@
-package form
+package box
 
 import (
-	"fmt"
 	termbox "github.com/nsf/termbox-go"
-	"os"
 )
 
-type OutOfBoundsError struct{}
-
-func (e OutOfBoundsError) Error() string {
-	return "Went out of bounds!"
-}
-
-type Box interface {
-	Size() (int, int)
-	SetCell(x, y int, ch rune, fg, bg termbox.Attribute)
-}
-
-// TermBox is a box which wraps termbox's cell buffer into a Box
-type TermBox struct{}
-
-func (t *TermBox) Size() (int, int) {
-	return termbox.Size()
-}
-func (t *TermBox) SetCell(x, y int, ch rune, fg, bg termbox.Attribute) {
-	termbox.SetCell(x, y, ch, fg, bg)
-}
-
-func NewCellsBox(cells []termbox.Cell, width int) *CellsBox {
+func NewCellsBox(width int, height int) *CellsBox {
 	return &CellsBox{
-		cells: cells,
+		cells: make([]termbox.Cell, width*height),
 		width: width,
 	}
+
 }
 
 // cellsBox is a Box which can Draw its contents into Boxes
 type CellsBox struct {
 	cells []termbox.Cell
 	width int
+}
+
+func (c *CellsBox) CellBuffer() []termbox.Cell {
+	return c.cells
+}
+
+func (c *CellsBox) Fill(cell *termbox.Cell) {
+	for i, _ := range c.cells {
+		c.cells[i] = *cell
+	}
 }
 
 func (c *CellsBox) Size() (w, h int) {
@@ -56,7 +44,7 @@ func (c *CellsBox) DrawInto(c1 Box, x, y int) error {
 
 	// if the Box we're drawing is going to go outside the bounds of the one we're drawing into, fail!
 	if x+w > w1 || y+h > h1 {
-		return OutOfBoundsError{}
+		return OutOfBoundsError{x + w, y + h, w1, h1}
 	}
 
 	counter := 0
