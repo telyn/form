@@ -4,7 +4,7 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
-func NewCellsBox(width int, height int) *CellsBox {
+func New(width int, height int) *CellsBox {
 	return &CellsBox{
 		cells: make([]termbox.Cell, width*height),
 		width: width,

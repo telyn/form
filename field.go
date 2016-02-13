@@ -1,10 +1,13 @@
 package form
 
-type ValidationFunc func(string) bool
+import (
+	termbox "github.com/nsf/termbox-go"
+)
 
-type Field struct {
-	Name     string
-	Text     string
-	Value    string
-	Validate ValidationFunc
+type Field interface {
+	Widget
+	Focus(hasFocus bool)
+	ReceiveKey(termbox.Key)
+	ReceiveRune(ch rune)
+	Validate() bool
 }

@@ -9,7 +9,7 @@ import (
 func TestFill(t *testing.T) {
 	is := is.New(t)
 
-	box := NewCellsBox(4, 4)
+	box := New(4, 4)
 	defaultCell := termbox.Cell{
 		Ch: ' ',
 		Fg: termbox.ColorDefault,

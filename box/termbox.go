@@ -7,6 +7,15 @@ import (
 // TermBox is a box which wraps termbox's cell buffer into a Box
 type TermBox struct{}
 
+func (t *TermBox) Fill(cell *termbox.Cell) {
+	w, h := termbox.Size()
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			termbox.SetCell(x, y, cell.Ch, cell.Fg, cell.Bg)
+		}
+	}
+}
+
 func (t *TermBox) Size() (int, int) {
 	return termbox.Size()
 }
