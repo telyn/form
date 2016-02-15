@@ -1,4 +1,3 @@
-// TextField is a form field for a single line of text
 package form
 
 import (
@@ -7,27 +6,30 @@ import (
 	"log"
 )
 
+// TextField is a form field for a single line of text
 type TextField struct {
 	viewOffsetX int
 	oldCursorX  int
 	cursorX     int
 	width       int
 	value       []rune
+	validFn     func(string) bool
 }
 
-func NewTextField(width int, value []rune) *TextField {
+func NewTextField(width int, value []rune, validateFn func(string) bool) *TextField {
 	return &TextField{
 		width:   width,
 		cursorX: -1,
+		validFn: validateFn,
 	}
 }
 
 func (f *TextField) Draw() *box.CellsBox {
 	//log.Printf("Drawing. len(value):%v viewOffsetX:%v cursorX:%v", len(f.value), f.viewOffsetX, f.cursorX)
 	box := box.New(f.width, 1)
-	fg := termbox.ColorRed
+	fg := termbox.ColorRed | termbox.AttrUnderline
 	if f.Validate() {
-		fg = termbox.ColorGreen
+		fg = termbox.ColorGreen | termbox.AttrUnderline
 	}
 	for i := 0; i < f.width; i++ {
 		idx := f.viewOffsetX + i
@@ -36,7 +38,7 @@ func (f *TextField) Draw() *box.CellsBox {
 		if idx < len(f.value) {
 			ch = f.value[idx]
 		}
-		bg := termbox.ColorBlue
+		bg := termbox.ColorDefault
 		if i == f.cursorX {
 			bg = termbox.ColorWhite
 		}
@@ -138,5 +140,5 @@ func (f *TextField) ReceiveRune(ch rune) {
 }
 
 func (f *TextField) Validate() bool {
-	return true
+	return f.validFn(string(f.value))
 }

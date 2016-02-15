@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytemark.co.uk/client/cmds/util"
 	"fmt"
 	termbox "github.com/nsf/termbox-go"
 	. "github.com/telyn/form"
@@ -14,8 +15,8 @@ func draw() bool {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
 	termbox.SetCell(0, 0, 'H', 0, 0)
-	termbox.SetCell(0, 0, 'e', 0, 0)
-	termbox.SetCell(0, 0, 'y', 0, 0)
+	termbox.SetCell(1, 0, 'e', 0, 0)
+	termbox.SetCell(2, 0, 'y', 0, 0)
 	textField.DrawInto(&box.TermBox{}, 4, 0)
 
 	termbox.Flush()
@@ -23,7 +24,12 @@ func draw() bool {
 }
 
 func main() {
-	textField = NewTextField(16, make([]rune, 0))
+	textField = NewTextField(16, make([]rune, 0), func(val string) bool {
+		if len(val) > 3 {
+			return true
+		}
+		return false
+	})
 	textField.Focus(true)
 
 	err := termbox.Init()
