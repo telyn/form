@@ -23,7 +23,7 @@ func NewTextField(width int, value []rune) *TextField {
 }
 
 func (f *TextField) Draw() *box.CellsBox {
-	log.Printf("Drawing. len(value):%v viewOffsetX:%v cursorX:%v", len(f.value), f.viewOffsetX, f.cursorX)
+	//log.Printf("Drawing. len(value):%v viewOffsetX:%v cursorX:%v", len(f.value), f.viewOffsetX, f.cursorX)
 	box := box.New(f.width, 1)
 	fg := termbox.ColorRed
 	if f.Validate() {
@@ -72,16 +72,27 @@ func (f *TextField) SetCursor(x, y int) {
 	if x < 0 && f.viewOffsetX > 0 {
 		f.cursorX = 0
 		f.viewOffsetX--
-	} else if x > f.width {
+	} else if x >= f.width {
 		f.cursorX = f.width - 1
 		f.viewOffsetX++
+	} else if x >= 0 {
+		if x+f.viewOffsetX < len(f.value)+1 {
+			f.cursorX = x
+		}
 	} else {
-		f.cursorX = x
+		f.cursorX = 0
 	}
 }
 
 func (f *TextField) removeChar(offset int) {
-	copy(f.value[offset+1:], f.value[offset:])
+	if offset > len(f.value)-1 {
+		return
+	}
+	if offset < len(f.value)-1 {
+		log.Printf("Moving %d (%c) to %d", offset+1, f.value[offset+1], offset)
+		copy(f.value[offset:], f.value[offset+1:])
+	}
+	log.Printf("Taking %d (%c) off the end", offset, f.value[offset])
 	f.value = f.value[:len(f.value)-1]
 }
 
@@ -91,9 +102,11 @@ func (f *TextField) ReceiveKey(key termbox.Key) {
 		f.SetCursor(f.cursorX-1, 0)
 	case termbox.KeyArrowRight:
 		f.SetCursor(f.cursorX+1, 0)
-	case termbox.KeyBackspace:
-		f.removeChar(f.viewOffsetX + f.cursorX - 1)
+	case termbox.KeyBackspace, termbox.KeyBackspace2:
 		f.SetCursor(f.cursorX-1, 0)
+		f.removeChar(f.viewOffsetX + f.cursorX)
+	case termbox.KeySpace:
+		f.ReceiveRune(' ')
 	case termbox.KeyDelete:
 		f.removeChar(f.viewOffsetX + f.cursorX)
 
@@ -105,6 +118,7 @@ func (f *TextField) Size() (int, int) {
 }
 
 func (f *TextField) ReceiveRune(ch rune) {
+
 	pos := f.viewOffsetX + f.cursorX
 	runes := make([]rune, len(f.value)+1)
 	if len(f.value) > 0 {
@@ -120,7 +134,7 @@ func (f *TextField) ReceiveRune(ch rune) {
 	runes[pos] = ch
 	f.value = runes
 	f.SetCursor(f.cursorX+1, 0)
-	log.Printf("runes:%v pos:%v cursor:%v", len(f.value), pos, f.cursorX)
+	//log.Printf("runes:%v pos:%v cursor:%v", len(f.value), pos, f.cursorX)
 }
 
 func (f *TextField) Validate() bool {
