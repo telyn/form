@@ -6,8 +6,8 @@ import (
 
 type Field interface {
 	Widget
-	Focus(hasFocus bool)
+	Focus(bool)
 	ReceiveKey(termbox.Key)
-	ReceiveRune(ch rune)
+	ReceiveRune(rune)
 	Validate() bool
 }

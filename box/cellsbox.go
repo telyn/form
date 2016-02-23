@@ -37,6 +37,10 @@ func (c *CellsBox) SetCell(x, y int, ch rune, fg, bg termbox.Attribute) {
 	c.cells[offset] = termbox.Cell{Ch: ch, Fg: fg, Bg: bg}
 }
 
+func (c *CellsBox) GetCell(x, y int) *termbox.Cell {
+	return c.cells[y*c.width+x]
+}
+
 // DrawInto inserts one box inside another at a given point
 func (c *CellsBox) DrawInto(c1 Box, x, y int) error {
 	w, h := c.Size()

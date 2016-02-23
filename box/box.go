@@ -19,4 +19,5 @@ type Box interface {
 	Fill(*termbox.Cell)
 	Size() (int, int)
 	SetCell(x, y int, ch rune, fg, bg termbox.Attribute)
+	GetCell(x, y int) *termbox.Cell
 }

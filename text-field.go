@@ -124,6 +124,8 @@ func (f *TextField) ReceiveRune(ch rune) {
 	pos := f.viewOffsetX + f.cursorX
 	runes := make([]rune, len(f.value)+1)
 	if len(f.value) > 0 {
+		// I *could* use copy here, but this works and I don't want to
+		// mess with it
 		for i, _ := range runes {
 			if i < pos {
 				runes[i] = f.value[i]

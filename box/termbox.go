@@ -16,6 +16,15 @@ func (t *TermBox) Fill(cell *termbox.Cell) {
 	}
 }
 
+func (t *TermBox) GetCell(x, y int) *termbox.Cell {
+	w, h := termbox.Size()
+	idx := y*w + x
+	if idx > w*h {
+		return nil
+	}
+	return &termbox.CellBuffer()[idx]
+}
+
 func (t *TermBox) Size() (int, int) {
 	return termbox.Size()
 }
