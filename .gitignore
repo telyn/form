@@ -1,2 +1,4 @@
 cmd/test-text-field/test-text-field
+cmd/test-label-field/test-label-field
+cmd/test-form/test-form
 dbg.log

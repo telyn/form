@@ -8,28 +8,32 @@ import (
 	"os"
 )
 
-var labelField Field
+var form *Form
 
 func draw() bool {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	labelField.DrawInto(&box.TermBox{}, 0, 0)
+	form.DrawInto(&box.TermBox{}, 0, 0)
 
 	termbox.Flush()
 	return true
 }
 
 func main() {
-	textField := NewTextField(12, []rune(""), func(val string) bool {
-		return true
+	field := NewTextField(12, []rune(""), func(val string) bool {
+		return false
 	})
-	labelField = Label(textField,
-		"was jean-michel jarre a fraud? discuss in one line or else. YOU MUST DISCUSS IT OR ELSE ELEVEN YEARS DUNGEON AAAAAA")
-	labelField.Focus(true)
-
+	field1 := NewTextField(24, []rune(""), func(val string) bool { return true })
+	form = NewForm([]Field{
+		Label(field, "First text field, yeah!"),
+		Label(field1, "Second text field, accompanied by a whole load more words. Like at least nine words but probably more yeah. That's how many words we're going for anyway. This ought to do"),
+	})
 	err := termbox.Init()
+	defer termbox.Close()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
+
 	if draw() {
 		fmt.Fprintf(os.Stderr, "drew ok\r\n")
 
@@ -42,22 +46,15 @@ func main() {
 					break loop
 				default:
 					if ev.Ch != '\x00' {
-						textField.ReceiveRune(ev.Ch)
+						form.ReceiveRune(ev.Ch)
 					} else {
-						textField.ReceiveKey(ev.Key)
+						form.ReceiveKey(ev.Key)
 					}
-					draw()
 				}
-
 			case termbox.EventResize:
-				draw()
+				form.HandleResize(ev.Width, ev.Height)
 			}
 		}
-		termbox.Close()
-	} else {
-		fmt.Printf("Didn't draw correctly\r\n")
 	}
-
-	fmt.Printf("Hey %s\r\n", textField.GetValue())
 
 }

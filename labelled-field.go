@@ -22,6 +22,7 @@ func Label(f Field, label string) Field {
 }
 
 func (f *LabelledField) DrawInto(box box.Box, offsetX, offsetY int) {
+	log.Printf("LabelledField.DrawInto(box,%d,%d)", offsetX, offsetY)
 	boxW, _ /*boxH*/ := box.Size()
 	sizeX, _ /*sizeY*/ := f.Size()
 	innerWidth, _ := f.innerField.Size()
