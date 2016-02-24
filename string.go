@@ -2,6 +2,7 @@ package form
 
 import (
 	"github.com/telyn/form/box"
+	"log"
 	"strings"
 )
 
@@ -39,11 +40,13 @@ func DrawString(str string, box box.Box, offsetX, offsetY, width int) {
 		case '\r':
 			curX = offsetX
 		case '\n':
-			curY = offsetY
+			curY = offsetY + 1
 		default:
 			cell := box.GetCell(curX, curY)
+			log.Printf("box.SetCell(%d,%d,%c,fg,bg)", curX, curY, ch)
 			box.SetCell(curX, curY, ch, cell.Fg, cell.Bg)
 		}
+		curX++
 	}
 
 }

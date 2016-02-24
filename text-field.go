@@ -16,6 +16,9 @@ type TextField struct {
 	validFn     func(string) bool
 }
 
+// NewTextField creates a new text field (quel surprise). Width is absolute -
+// come hell or high water, the displayed width will be width. value is the
+// initial value and need not be capacious
 func NewTextField(width int, value []rune, validateFn func(string) bool) *TextField {
 	return &TextField{
 		width:   width,
