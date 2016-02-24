@@ -73,13 +73,19 @@ func (f *TextField) Focus(hasFocus bool) {
 	}
 }
 
+func (f *TextField) HandleResize(x, y int) {
+	return // leave me alone I am a fixed size
+}
+
 func (f *TextField) SetCursor(x, y int) {
 	if x < 0 && f.viewOffsetX > 0 {
 		f.cursorX = 0
 		f.viewOffsetX--
 	} else if x >= f.width {
 		f.cursorX = f.width - 1
-		f.viewOffsetX++
+		if x+f.viewOffsetX < len(f.value)+1 {
+			f.viewOffsetX++
+		}
 	} else if x >= 0 {
 		if x+f.viewOffsetX < len(f.value)+1 {
 			f.cursorX = x
