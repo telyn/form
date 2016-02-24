@@ -2,7 +2,6 @@ package form
 
 import (
 	"github.com/telyn/form/box"
-	"log"
 	"strings"
 )
 
@@ -24,7 +23,8 @@ func FlowString(str string, width int) string {
 		}
 	}
 	if line != "" {
-		return strings.Join(lines, "\r\n") + "\r\n" + line
+		lines = append(lines, line)
+		return strings.Join(lines, "\r\n")
 	} else {
 		return strings.Join(lines, "\r\n")
 	}
@@ -43,10 +43,9 @@ func DrawString(str string, box box.Box, offsetX, offsetY, width int) {
 			curY = offsetY + 1
 		default:
 			cell := box.GetCell(curX, curY)
-			log.Printf("box.SetCell(%d,%d,%c,fg,bg)", curX, curY, ch)
 			box.SetCell(curX, curY, ch, cell.Fg, cell.Bg)
+			curX++
 		}
-		curX++
 	}
 
 }
