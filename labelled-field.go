@@ -4,12 +4,14 @@ import (
 	termbox "github.com/nsf/termbox-go"
 	"github.com/telyn/form/box"
 	"log"
+	"strings"
 )
 
 type LabelledField struct {
 	innerField   Field
 	label        string
 	errorMessage string
+	outerWidth   int // used for Size()
 }
 
 func Label(f Field, label string) Field {
@@ -30,9 +32,12 @@ func (f *LabelledField) DrawInto(box box.Box, offsetX, offsetY int) {
 		return
 	}
 
-	labelWidth := boxW - innerWidth - 3
+	// -2 for spaces either side of the label, -3 for space after the innerField
+	labelWidth := (boxW - offsetX) - innerWidth - 5
 	log.Printf("labelWidth: %d", labelWidth)
 	DrawString(f.label, box, offsetX+1, offsetY, labelWidth)
+	f.innerField.DrawInto(box, offsetX+labelWidth+4, offsetY)
+
 	return
 }
 
@@ -44,6 +49,10 @@ func (f *LabelledField) GetCursor() (x, y int) {
 	return -1, 0
 }
 
+func (f *LabelledField) HandleResize(w, h int) {
+	f.outerWidth = w
+}
+
 func (f *LabelledField) ReceiveKey(key termbox.Key) {
 	f.innerField.ReceiveKey(key)
 }
@@ -53,7 +62,15 @@ func (f *LabelledField) ReceiveRune(ch rune) {
 
 func (f *LabelledField) Size() (w, h int) {
 	fieldW, fieldH := f.innerField.Size()
-	return fieldW + 7, fieldH
+	labelWidth := f.outerWidth - fieldW - 5
+
+	str := FlowString(f.label, labelWidth)
+	lines := strings.Count(str, "\n")
+	if lines < fieldH {
+		lines = fieldH
+	}
+
+	return f.outerWidth, lines
 }
 
 func (f *LabelledField) Validate() bool {

@@ -9,4 +9,5 @@ type Widget interface {
 	GetCursor() (x int, y int)
 	SetCursor(x, y int)
 	DrawInto(box box.Box, x int, y int)
+	HandleResize(w, h int)
 }
