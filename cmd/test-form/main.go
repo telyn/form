@@ -39,21 +39,12 @@ func main() {
 
 	loop:
 		for {
-			switch ev := termbox.PollEvent(); ev.Type {
-			case termbox.EventKey:
-				switch ev.Key {
-				case termbox.KeyEsc, termbox.KeyCtrlC:
-					break loop
-				default:
-					if ev.Ch != '\x00' {
-						form.ReceiveRune(ev.Ch)
-					} else {
-						form.ReceiveKey(ev.Key)
-					}
-				}
-			case termbox.EventResize:
-				form.HandleResize(ev.Width, ev.Height)
+			ev := termbox.PollEvent()
+			if !form.HandleEvent(&ev) {
+				log.Print("Exiting because HandleEvent said so")
+				break loop
 			}
+			draw()
 		}
 	}
 
