@@ -30,7 +30,6 @@ func (f *Form) AddField(field Field) {
 		field.Focus(true)
 	}
 	f.fields = append(f.fields, field)
-	log.Printf("Adding a field. Before len: %d after len: %d", bLen, len(f.fields))
 }
 
 func (f *Form) HandleResize(w, h int) {
@@ -40,7 +39,6 @@ func (f *Form) HandleResize(w, h int) {
 }
 
 func (f *Form) DrawInto(box box.Box, offsetX, offsetY int) {
-	log.Printf("Now that we're drawing, %d fields", len(f.fields))
 	if len(f.fields) == 0 {
 		return
 	}

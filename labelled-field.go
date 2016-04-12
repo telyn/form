@@ -3,7 +3,6 @@ package form
 import (
 	termbox "github.com/nsf/termbox-go"
 	"github.com/telyn/form/box"
-	"log"
 	"strings"
 )
 
@@ -22,7 +21,6 @@ func Label(f Field, label string) Field {
 }
 
 func (f *LabelledField) DrawInto(box box.Box, offsetX, offsetY int) {
-	log.Printf("LabelledField.DrawInto(box,%d,%d)", offsetX, offsetY)
 	boxW, _ /*boxH*/ := box.Size()
 	sizeX, _ /*sizeY*/ := f.Size()
 	innerWidth, _ := f.innerField.Size()
@@ -35,7 +33,6 @@ func (f *LabelledField) DrawInto(box box.Box, offsetX, offsetY int) {
 
 	// -2 for spaces either side of the label, -3 for space after the innerField
 	labelWidth := (boxW - offsetX) - innerWidth - 5
-	log.Printf("labelWidth: %d", labelWidth)
 	DrawString(f.label, box, offsetX+1, offsetY, labelWidth)
 	f.innerField.DrawInto(box, offsetX+labelWidth+4, offsetY)
 

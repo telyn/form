@@ -64,12 +64,12 @@ func (f *TextField) GetValue() string {
 }
 
 func (f *TextField) Focus(hasFocus bool) {
+	log.Printf("focus(%v)", hasFocus)
 	if hasFocus {
 		f.cursorX = f.oldCursorX
 	} else {
 		f.oldCursorX = f.cursorX
 		f.cursorX = -1
-
 	}
 }
 
