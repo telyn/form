@@ -8,8 +8,9 @@ import (
 )
 
 type Form struct {
-	fields       []Field
-	currentField int
+	fields          []Field
+	currentField    int
+	currentTopField int
 
 	escapeSequenceStart time.Time
 	escapeSequence      []byte
@@ -48,7 +49,10 @@ func (f *Form) DrawInto(box box.Box, offsetX, offsetY int) {
 
 	currentY := offsetY
 
-	for i, field := range f.fields {
+	// it would be nice to draw into an infinitely large box and then only copy the relevant portion.. this architecture doesn't really allow for that though
+	f.ensureCurrentFieldOnScreen(boxH)
+
+	for i, field := range f.fields[f.currentTopField:] {
 		field.HandleResize(boxW-offsetX, boxH-offsetY)
 		_, fieldH := field.Size()
 		log.Printf("field %d: box: %dx%d offset: (%d,%d) fieldH: %d)", i, boxW, boxH, offsetX, currentY, fieldH)
@@ -62,6 +66,33 @@ func (f *Form) DrawInto(box box.Box, offsetX, offsetY int) {
 
 func (f *Form) ReceiveRune(ch rune) {
 	f.fields[f.currentField].ReceiveRune(ch)
+}
+
+func (f *Form) Run() {
+
+}
+
+func (f *Form) ensureCurrentFieldOnScreen(boxH int) {
+	// scroll up if necessary
+	if f.currentField < f.currentTopField {
+		f.currentTopField = f.currentField
+	} else if f.currentField > f.currentTopField {
+		// scroll down ONLY AS FAR AS NECESSARY
+		// but we need to know the box size in order to do so.
+
+		// start at current field and work way back up to find top field
+		height := 0
+		// this will do weird crap when the window is too small to fit the currentField, but never mind... i guess
+		for top := f.currentField; top > 0; top-- {
+			_, h := f.fields[top].Size()
+			height += h + 1
+			if height >= boxH {
+				f.currentTopField = top + 1
+				break
+			}
+		}
+
+	}
 }
 
 func (f *Form) SelectPreviousField() {

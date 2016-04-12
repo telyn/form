@@ -10,4 +10,5 @@ type Field interface {
 	ReceiveKey(termbox.Key)
 	ReceiveRune(rune)
 	Validate() bool
+	Value() string
 }

@@ -40,7 +40,7 @@ func DrawString(str string, box box.Box, offsetX, offsetY, width int) {
 		case '\r':
 			curX = offsetX
 		case '\n':
-			curY = offsetY + 1
+			curY++
 		default:
 			cell := box.GetCell(curX, curY)
 			box.SetCell(curX, curY, ch, cell.Fg, cell.Bg)

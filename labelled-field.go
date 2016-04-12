@@ -66,7 +66,7 @@ func (f *LabelledField) Size() (w, h int) {
 	labelWidth := f.outerWidth - fieldW - 5
 
 	str := FlowString(f.label, labelWidth)
-	lines := strings.Count(str, "\n")
+	lines := strings.Count(str, "\n") + 1
 	if lines < fieldH {
 		lines = fieldH
 	}
@@ -76,6 +76,10 @@ func (f *LabelledField) Size() (w, h int) {
 
 func (f *LabelledField) Validate() bool {
 	return f.innerField.Validate()
+}
+
+func (f *LabelledField) Value() string {
+	return f.innerField.Value()
 }
 
 func (f *LabelledField) SetCursor(x, y int) {

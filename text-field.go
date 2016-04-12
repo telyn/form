@@ -153,3 +153,7 @@ func (f *TextField) ReceiveRune(ch rune) {
 func (f *TextField) Validate() bool {
 	return f.validFn(string(f.value))
 }
+
+func (f *TextField) Value() string {
+	return string(f.value)
+}
