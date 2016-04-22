@@ -3,7 +3,7 @@ package form
 import (
 	termbox "github.com/nsf/termbox-go"
 	"github.com/telyn/form/box"
-	"log"
+	//"log"
 )
 
 // TextField is a form field for a single line of text
@@ -64,7 +64,7 @@ func (f *TextField) GetValue() string {
 }
 
 func (f *TextField) Focus(hasFocus bool) {
-	log.Printf("focus(%v)", hasFocus)
+	//log.Printf("focus(%v)", hasFocus)
 	if hasFocus {
 		f.cursorX = f.oldCursorX
 	} else {
@@ -100,10 +100,10 @@ func (f *TextField) removeChar(offset int) {
 		return
 	}
 	if offset < len(f.value)-1 {
-		log.Printf("Moving %d (%c) to %d", offset+1, f.value[offset+1], offset)
+		//log.Printf("Moving %d (%c) to %d", offset+1, f.value[offset+1], offset)
 		copy(f.value[offset:], f.value[offset+1:])
 	}
-	log.Printf("Taking %d (%c) off the end", offset, f.value[offset])
+	//log.Printf("Taking %d (%c) off the end", offset, f.value[offset])
 	f.value = f.value[:len(f.value)-1]
 }
 

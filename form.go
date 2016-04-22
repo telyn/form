@@ -3,7 +3,9 @@ package form
 import (
 	termbox "github.com/nsf/termbox-go"
 	"github.com/telyn/form/box"
-	"log"
+	//"log"
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -14,12 +16,16 @@ type Form struct {
 
 	escapeSequenceStart time.Time
 	escapeSequence      []byte
+	running             bool
 }
 
 func NewForm(fields []Field) (form *Form) {
 	form = new(Form)
 	for _, f := range fields {
 		form.AddField(f)
+	}
+	for fmt.Sprintf("%T", form.fields[form.currentField]) == "*form.LabelField" {
+		form.SelectNextField()
 	}
 	return form
 }
@@ -50,10 +56,10 @@ func (f *Form) DrawInto(box box.Box, offsetX, offsetY int) {
 	// it would be nice to draw into an infinitely large box and then only copy the relevant portion.. this architecture doesn't really allow for that though
 	f.ensureCurrentFieldOnScreen(boxH)
 
-	for i, field := range f.fields[f.currentTopField:] {
+	for _, field := range f.fields[f.currentTopField:] {
 		field.HandleResize(boxW-offsetX, boxH-offsetY)
 		_, fieldH := field.Size()
-		log.Printf("field %d: box: %dx%d offset: (%d,%d) fieldH: %d)", i, boxW, boxH, offsetX, currentY, fieldH)
+		//log.Printf("field %d: box: %dx%d offset: (%d,%d) fieldH: %d)", i, boxW, boxH, offsetX, currentY, fieldH)
 		if currentY+fieldH > boxH {
 			return
 		}
@@ -66,8 +72,37 @@ func (f *Form) ReceiveRune(ch rune) {
 	f.fields[f.currentField].ReceiveRune(ch)
 }
 
-func (f *Form) Run() {
+func (f *Form) Run() error {
+	draw := func() bool {
+		termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+		f.DrawInto(&box.TermBox{}, 0, 0)
 
+		termbox.Flush()
+		return true
+	}
+	err := termbox.Init()
+	defer termbox.Close()
+	if err != nil {
+		return err
+	}
+
+	if draw() {
+		f.running = true
+		for f.running {
+			ev := termbox.PollEvent()
+			if !f.HandleEvent(&ev) {
+				f.running = false
+			}
+			draw()
+		}
+	} else {
+		return errors.New("fail sadness")
+	}
+	return nil
+}
+
+func (f *Form) Stop() {
+	f.running = false
 }
 
 func (f *Form) ensureCurrentFieldOnScreen(boxH int) {
@@ -100,7 +135,7 @@ func (f *Form) SelectPreviousField() {
 		f.currentField = len(f.fields) - 1
 	}
 	f.fields[f.currentField].Focus(true)
-	log.Printf("tab recvd. New currentField: %d", f.currentField)
+	//log.Printf("tab recvd. New currentField: %d", f.currentField)
 }
 
 func (f *Form) SelectNextField() {
@@ -110,7 +145,7 @@ func (f *Form) SelectNextField() {
 		f.currentField = 0
 	}
 	f.fields[f.currentField].Focus(true)
-	log.Printf("tab recvd. New currentField: %d", f.currentField)
+	//log.Printf("tab recvd. New currentField: %d", f.currentField)
 }
 
 func (f *Form) ReceiveKey(key termbox.Key) {
@@ -124,7 +159,7 @@ func (f *Form) ReceiveKey(key termbox.Key) {
 
 // HandleEvent takes a termbox event and
 func (f *Form) HandleEvent(ev *termbox.Event) (keepRunning bool) {
-	log.Printf("Key: %x Ch: %c", ev.Key, ev.Ch)
+	//log.Printf("Key: %x Ch: %c", ev.Key, ev.Ch)
 	switch ev.Type {
 	case termbox.EventKey:
 		// we have to deal with escape sequences in this way because Mac terminals are weird
