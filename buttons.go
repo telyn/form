@@ -23,6 +23,7 @@ func NewButtonsField(bs []Button) (bf *ButtonsField) {
 	bf = new(ButtonsField)
 
 	bf.buttons = bs
+	bf.currentlySelected = -1
 	return
 }
 
