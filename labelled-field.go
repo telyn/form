@@ -71,8 +71,16 @@ func (f *LabelledField) Size() (w, h int) {
 	return f.outerWidth, lines
 }
 
-func (f *LabelledField) Validate() bool {
-	return f.innerField.Validate()
+func (f *LabelledField) Validate() (string, bool) {
+	prob, ok := f.innerField.Validate()
+	upTo := strings.IndexAny(f.label, "\r(")
+	if upTo == -1 {
+		prob = f.label + ": " + prob
+	} else {
+		prob = strings.TrimSpace(f.label[0:upTo]) + ": " + prob
+	}
+	return prob, ok
+
 }
 
 func (f *LabelledField) Value() string {

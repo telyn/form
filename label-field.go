@@ -61,8 +61,8 @@ func (f *LabelField) Size() (w, h int) {
 	return f.outerWidth, lines
 }
 
-func (f *LabelField) Validate() bool {
-	return true
+func (f *LabelField) Validate() (string, bool) {
+	return "", true
 }
 
 func (f *LabelField) Value() string {

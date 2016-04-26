@@ -95,8 +95,8 @@ func (bf *ButtonsField) Size() (x, y int) {
 	return length + 1, 1
 }
 
-func (bf *ButtonsField) Validate() bool {
-	return true
+func (bf *ButtonsField) Validate() (string, bool) {
+	return "", true
 }
 func (bf *ButtonsField) Value() string {
 	return ""

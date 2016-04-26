@@ -13,13 +13,13 @@ type TextField struct {
 	cursorX     int
 	width       int
 	value       []rune
-	validFn     func(string) bool
+	validFn     func(string) (string, bool)
 }
 
 // NewTextField creates a new text field (quel surprise). Width is absolute -
 // come hell or high water, the displayed width will be width. value is the
 // initial value and need not be capacious
-func NewTextField(width int, value []rune, validateFn func(string) bool) *TextField {
+func NewTextField(width int, value []rune, validateFn func(string) (string, bool)) *TextField {
 	return &TextField{
 		width:   width,
 		cursorX: -1,
@@ -31,7 +31,7 @@ func (f *TextField) Draw() *box.CellsBox {
 	//log.Printf("Drawing. len(value):%v viewOffsetX:%v cursorX:%v", len(f.value), f.viewOffsetX, f.cursorX)
 	box := box.New(f.width, 1)
 	fg := termbox.ColorRed | termbox.AttrUnderline
-	if f.Validate() {
+	if _, ok := f.Validate(); ok {
 		fg = termbox.ColorGreen | termbox.AttrUnderline
 	}
 	for i := 0; i < f.width; i++ {
@@ -150,7 +150,7 @@ func (f *TextField) ReceiveRune(ch rune) {
 	//log.Printf("runes:%v pos:%v cursor:%v", len(f.value), pos, f.cursorX)
 }
 
-func (f *TextField) Validate() bool {
+func (f *TextField) Validate() (string, bool) {
 	return f.validFn(string(f.value))
 }
 

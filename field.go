@@ -9,6 +9,6 @@ type Field interface {
 	Focus(bool)
 	ReceiveKey(termbox.Key)
 	ReceiveRune(rune)
-	Validate() bool
+	Validate() (string, bool)
 	Value() string
 }

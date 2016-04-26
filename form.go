@@ -203,3 +203,13 @@ func (f *Form) HandleEvent(ev *termbox.Event) (keepRunning bool) {
 	}
 	return true
 }
+
+func (f *Form) Validate() ([]string, bool) {
+	problems := make([]string, 0)
+	for _, field := range f.fields {
+		if p, ok := field.Validate(); !ok {
+			problems = append(problems, p)
+		}
+	}
+	return problems, len(problems) == 0
+}
