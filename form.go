@@ -1,11 +1,10 @@
 package form
 
 import (
+	"errors"
 	termbox "github.com/nsf/termbox-go"
 	"github.com/telyn/form/box"
 	//"log"
-	"errors"
-	"fmt"
 	"time"
 )
 
@@ -24,9 +23,8 @@ func NewForm(fields []Field) (form *Form) {
 	for _, f := range fields {
 		form.AddField(f)
 	}
-	for fmt.Sprintf("%T", form.fields[form.currentField]) == "*form.LabelField" {
-		form.SelectNextField()
-	}
+	form.currentField = -1
+	form.SelectNextField()
 	return form
 }
 
@@ -52,12 +50,14 @@ func (f *Form) DrawInto(box box.Box, offsetX, offsetY int) {
 	boxW, boxH := box.Size()
 
 	currentY := offsetY
+	for _, field := range f.fields {
+		field.HandleResize(boxW-offsetX, boxH-offsetY)
+	}
 
 	// it would be nice to draw into an infinitely large box and then only copy the relevant portion.. this architecture doesn't really allow for that though
 	f.ensureCurrentFieldOnScreen(boxH)
 
 	for _, field := range f.fields[f.currentTopField:] {
-		field.HandleResize(boxW-offsetX, boxH-offsetY)
 		_, fieldH := field.Size()
 		//log.Printf("field %d: box: %dx%d offset: (%d,%d) fieldH: %d)", i, boxW, boxH, offsetX, currentY, fieldH)
 		if currentY+fieldH > boxH {
@@ -106,26 +106,30 @@ func (f *Form) Stop() {
 }
 
 func (f *Form) ensureCurrentFieldOnScreen(boxH int) {
-	// scroll up if necessary
-	if f.currentField < f.currentTopField {
-		f.currentTopField = f.currentField
-	} else if f.currentField > f.currentTopField {
-		// scroll down ONLY AS FAR AS NECESSARY
-		// but we need to know the box size in order to do so.
+	//log.Printf("OLD currentField: %d currentTopField: %d boxH: %d", f.currentField, f.currentTopField, boxH)
+	// scroll down ONLY AS FAR AS NECESSARY
+	// but we need to know the box size in order to do so.
 
-		// start at current field and work way back up to find top field
-		height := 0
-		// this will do weird crap when the window is too small to fit the currentField, but never mind... i guess
-		for top := f.currentField; top > 0; top-- {
-			_, h := f.fields[top].Size()
-			height += h + 1
-			if height >= boxH {
-				f.currentTopField = top + 1
-				break
-			}
+	// start at current field and work way back up to find top field
+	height := 0
+	// this will do weird crap when the window is too small to fit the currentField, but never mind... i guess
+
+	// loop backwards from target field until we find a suitable starting point
+	top := 0
+	for top = f.currentField; top > -1; top-- {
+		_, h := f.fields[top].Size()
+		height += h + 1
+		//log.Printf("iter top: %d height: %d h: %d", top, height, h)
+		if height >= boxH {
+			f.currentTopField = top + 1
+			//log.Printf("NEW currentField: %d currentTopField: %d", f.currentField, f.currentTopField)
+			return
 		}
-
 	}
+
+	f.currentTopField = 0
+
+	//log.Printf("NEW currentField: %d currentTopField: %d", f.currentField, f.currentTopField)
 }
 
 func (f *Form) SelectPreviousField() {
@@ -135,16 +139,24 @@ func (f *Form) SelectPreviousField() {
 		f.currentField = len(f.fields) - 1
 	}
 	f.fields[f.currentField].Focus(true)
+	if _, ok := f.fields[f.currentField].(*LabelField); ok {
+		f.SelectPreviousField()
+	}
 	//log.Printf("tab recvd. New currentField: %d", f.currentField)
 }
 
 func (f *Form) SelectNextField() {
-	f.fields[f.currentField].Focus(false)
+	if f.currentField >= 0 {
+		f.fields[f.currentField].Focus(false)
+	}
 	f.currentField++
 	if f.currentField >= len(f.fields) {
 		f.currentField = 0
 	}
 	f.fields[f.currentField].Focus(true)
+	if _, ok := f.fields[f.currentField].(*LabelField); ok {
+		f.SelectNextField()
+	}
 	//log.Printf("tab recvd. New currentField: %d", f.currentField)
 }
 
