@@ -16,6 +16,8 @@ type Form struct {
 	escapeSequenceStart time.Time
 	escapeSequence      []byte
 	running             bool
+
+	maxWidth int
 }
 
 func NewForm(fields []Field) (form *Form) {
@@ -72,10 +74,22 @@ func (f *Form) ReceiveRune(ch rune) {
 	f.fields[f.currentField].ReceiveRune(ch)
 }
 
+func (f *Form) SetMaxWidth(w int) {
+	f.maxWidth = w
+}
+
 func (f *Form) Run() error {
 	draw := func() bool {
 		termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-		f.DrawInto(&box.TermBox{}, 0, 0)
+		w, h := termbox.Size()
+
+		if f.maxWidth < w {
+			cellsBox := box.New(f.maxWidth, h)
+			f.DrawInto(cellsBox, 0, 0)
+			cellsBox.DrawInto(&box.TermBox{}, 0, 0)
+		} else {
+			f.DrawInto(&box.TermBox{}, 0, 0)
+		}
 
 		termbox.Flush()
 		return true
@@ -96,7 +110,7 @@ func (f *Form) Run() error {
 			draw()
 		}
 	} else {
-		return errors.New("fail sadness")
+		return errors.New("form couldn't be drawn for some reason")
 	}
 	return nil
 }
